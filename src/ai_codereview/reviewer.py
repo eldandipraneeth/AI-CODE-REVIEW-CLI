@@ -82,8 +82,8 @@ class AIReviewer:
 
         self._client = OpenAI(**client_kwargs)
 
-        # Detect if this is a non-OpenAI provider (affects method used)
-        self._use_beta_parse = not bool(resolved_base_url)
+        # Detect provider — use structured output for native OpenAI, JSON mode for others
+        self._use_beta_parse = _is_openai_native(resolved_base_url, self.model)
 
     def review_chunk(self, chunk: DiffChunk) -> FileReviewResult:
         """Review a single diff chunk using AI structured output.
@@ -279,6 +279,27 @@ class AIReviewer:
             summary=summary,
             quality_score=round(avg_score, 1),
         )
+
+
+def _is_openai_native(base_url: str | None, model: str) -> bool:
+    """Determine if the provider supports OpenAI's native structured output.
+
+    Returns True for direct OpenAI API usage (no custom base_url, or
+    base_url pointing to api.openai.com). Returns False for Gemini,
+    Groq, and other third-party providers.
+    """
+    if not base_url:
+        # No custom URL — default OpenAI endpoint
+        return True
+
+    normalized = base_url.lower().rstrip("/")
+
+    # Explicit OpenAI endpoints
+    if "api.openai.com" in normalized:
+        return True
+
+    # Known non-OpenAI providers
+    return False
 
 
 def _deduplicate_issues(issues: list[ReviewIssue]) -> list[ReviewIssue]:

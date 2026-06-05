@@ -77,6 +77,8 @@ class GitHubClient:
             Raw unified diff string.
         """
         import requests
+        from requests.adapters import HTTPAdapter
+        from urllib3.util.retry import Retry
 
         pr = self.get_pull_request(pr_number)
         diff_url = pr.diff_url
@@ -86,7 +88,17 @@ class GitHubClient:
             "Accept": "application/vnd.github.v3.diff",
         }
 
-        response = requests.get(diff_url, headers=headers, timeout=30)
+        # Retry on transient GitHub errors (403, 429, 500, 502, 503)
+        session = requests.Session()
+        retries = Retry(
+            total=3,
+            backoff_factor=1.0,
+            status_forcelist=[403, 429, 500, 502, 503],
+            allowed_methods=["GET"],
+        )
+        session.mount("https://", HTTPAdapter(max_retries=retries))
+
+        response = session.get(diff_url, headers=headers, timeout=30)
         response.raise_for_status()
 
         return response.text

@@ -65,7 +65,7 @@ $ codereview diff --staged
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/codereview-cli.git
+git clone https://github.com/eldandipraneeth/AI-CODE-REVIEW-CLI.git
 cd codereview-cli
 
 # Install the CLI tool
@@ -169,7 +169,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run AI Code Review
-        uses: your-org/codereview-cli@main
+        uses: eldandipraneeth/AI-CODE-REVIEW-CLI@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           ai_api_key: ${{ secrets.AI_API_KEY }}
@@ -214,7 +214,7 @@ Contributions are welcome!
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/codereview-cli.git
+git clone https://github.com/eldandipraneeth/AI-CODE-REVIEW-CLI.git
 cd codereview-cli
 
 # Install with development dependencies

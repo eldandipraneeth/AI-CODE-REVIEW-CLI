@@ -271,6 +271,10 @@ def chunk_diff(
         if not file_diff.hunks:
             continue
 
+        # Skip non-reviewable files (lock files, generated code, etc.)
+        if _should_skip_file(file_diff.file_path):
+            continue
+
         file_chunks = _chunk_file_diff(file_diff, max_tokens, source_files)
         chunks.extend(file_chunks)
 
@@ -550,6 +554,60 @@ def _split_large_content(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+# Patterns for files that should be skipped during code review
+_SKIP_PATTERNS = [
+    # Lock files
+    "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "Pipfile.lock",
+    "poetry.lock", "composer.lock", "Gemfile.lock", "Cargo.lock",
+    # Build artifacts and generated code
+    "dist/", "build/", "out/", "node_modules/", ".next/",
+    "__pycache__/", ".egg-info/",
+    # Minified files
+    ".min.js", ".min.css", ".bundle.js",
+    # Data / binary-like files
+    ".json",  # large config files, only skip exact lock files above
+    ".svg", ".png", ".jpg", ".gif", ".ico", ".woff", ".woff2", ".ttf",
+    # Auto-generated
+    ".pb.go", "_generated.go", ".g.dart",
+    # Snapshots
+    "__snapshots__/",
+]
+
+# File extensions that are always worth reviewing
+_ALWAYS_REVIEW_EXTENSIONS = {
+    ".py", ".js", ".ts", ".tsx", ".jsx", ".go", ".rs", ".java",
+    ".rb", ".php", ".c", ".cpp", ".h", ".hpp", ".cs", ".swift",
+    ".kt", ".scala", ".sh", ".yaml", ".yml", ".toml",
+}
+
+
+def _should_skip_file(file_path: str) -> bool:
+    """Check if a file should be skipped during code review.
+
+    Skips lock files, generated code, minified files, build artifacts,
+    and binary files that provide no value in an AI code review.
+    """
+    normalized = file_path.lower().replace("\\\\", "/")
+
+    # Always review known source code extensions
+    for ext in _ALWAYS_REVIEW_EXTENSIONS:
+        if normalized.endswith(ext):
+            return False
+
+    # Check against skip patterns
+    for pattern in _SKIP_PATTERNS:
+        if pattern.endswith("/"):
+            # Directory pattern
+            if f"/{pattern}" in f"/{normalized}" or normalized.startswith(pattern):
+                return True
+        else:
+            # File name or extension pattern
+            if normalized.endswith(pattern) or normalized.split("/")[-1] == pattern:
+                return True
+
+    return False
+
 
 def _extract_context(source: str, line_number: int, language: str) -> str:
     """Extract surrounding context (imports, class definition) for a given line."""
