@@ -1,0 +1,14 @@
+{
+  "sql_injection.py": {
+    "expected_categories": ["security"],
+    "expected_min_severity": "high"
+  },
+  "missing_error_handling.py": {
+    "expected_categories": ["error_handling"],
+    "expected_min_severity": "medium"
+  },
+  "performance_issues.py": {
+    "expected_categories": ["performance"],
+    "expected_min_severity": "low"
+  }
+}

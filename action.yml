@@ -1,0 +1,62 @@
+name: 'AI Code Review'
+description: 'AI-powered code review using AI models. Automatically reviews pull requests and posts inline comments.'
+author: 'ai-codereview'
+
+branding:
+  icon: 'eye'
+  color: 'purple'
+
+inputs:
+  github_token:
+    description: 'GitHub token for API access (pull request comments, fetching diffs)'
+    required: true
+  ai_api_key:
+    description: 'AI API key for model access (Google Gemini, OpenAI, or any compatible provider)'
+    required: true
+  model:
+    description: 'AI model to use for code review'
+    required: false
+    default: 'gemini-2.5-flash'
+  severity_threshold:
+    description: 'Minimum severity level to report (low, medium, high, critical)'
+    required: false
+    default: 'low'
+  post_comments:
+    description: 'Whether to post review comments directly on the PR'
+    required: false
+    default: 'true'
+
+outputs:
+  review_status:
+    description: 'Status of the review (success, failure, skipped)'
+    value: ${{ steps.review.outputs.review_status }}
+  issues_found:
+    description: 'Number of issues found during review'
+    value: ${{ steps.review.outputs.issues_found }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install ai-codereview
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install "${{ github.action_path }}"
+
+    - name: Run AI Code Review
+      id: review
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        AI_API_KEY: ${{ inputs.ai_api_key }}
+        INPUT_MODEL: ${{ inputs.model }}
+        INPUT_SEVERITY_THRESHOLD: ${{ inputs.severity_threshold }}
+        INPUT_POST_COMMENTS: ${{ inputs.post_comments }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+      run: bash ${{ github.action_path }}/scripts/entrypoint.sh
