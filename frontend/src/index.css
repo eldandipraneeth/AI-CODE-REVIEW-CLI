@@ -1,0 +1,260 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+
+/* ─────────────────────────────────────────────
+   DESIGN TOKENS — Inspired by Linear / Vercel
+   ───────────────────────────────────────────── */
+@layer base {
+  :root {
+    /* ── Typography */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+
+    /* ── Backgrounds */
+    --background:     0 0% 99%;
+    --surface:        0 0% 97%;
+    --surface-raised: 0 0% 100%;
+
+    /* ── Foregrounds */
+    --foreground:         222 20% 10%;
+    --muted-foreground:   220 13% 46%;
+
+    /* ── Semantic surface */
+    --card:               0 0% 100%;
+    --card-foreground:    222 20% 10%;
+    --popover:            0 0% 100%;
+    --popover-foreground: 222 20% 10%;
+
+    /* ── Borders */
+    --border:       220 14% 91%;
+    --border-strong: 220 14% 83%;
+    --input:        220 14% 91%;
+
+    /* ── Brand — amber gold */
+    --primary:            38 92% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    /* ── Secondary / muted */
+    --muted:              220 14% 95%;
+    --secondary:          220 14% 95%;
+    --secondary-foreground: 222 20% 20%;
+
+    /* ── Accent */
+    --accent:             220 14% 95%;
+    --accent-foreground:  222 20% 20%;
+
+    /* ── Semantic status colors */
+    --success:            142 72% 35%;
+    --success-dim:        142 72% 96%;
+    --success-border:     142 72% 85%;
+    --warning:            38 92% 45%;
+    --warning-dim:        38 92% 96%;
+    --warning-border:     38 92% 82%;
+    --danger:             0 84% 55%;
+    --danger-dim:         0 84% 97%;
+    --danger-border:      0 84% 88%;
+    --info:               214 89% 50%;
+    --info-dim:           214 89% 96%;
+    --info-border:        214 89% 84%;
+
+    /* ── Destructive (maps to danger) */
+    --destructive:            0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* ── Ring / focus */
+    --ring:   38 92% 50%;
+
+    /* ── Border radius */
+    --radius-sm:   4px;
+    --radius:      8px;
+    --radius-md:   8px;
+    --radius-lg:   12px;
+    --radius-xl:   16px;
+    --radius-full: 9999px;
+
+    /* ── Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+    --shadow:    0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  }
+
+  .dark {
+    /* ── Backgrounds — warm charcoal, not cold navy */
+    --background:     20 6% 8%;
+    --surface:        20 6% 11%;
+    --surface-raised: 20 7% 14%;
+
+    /* ── Foregrounds — warm white */
+    --foreground:       30 15% 95%;
+    --muted-foreground: 30 8% 55%;
+
+    /* ── Semantic surface */
+    --card:               20 6% 11%;
+    --card-foreground:    30 15% 95%;
+    --popover:            20 7% 14%;
+    --popover-foreground: 30 15% 95%;
+
+    /* ── Borders */
+    --border:        20 8% 18%;
+    --border-strong: 20 8% 26%;
+    --input:         20 8% 18%;
+
+    /* ── Brand — vibrant amber gold */
+    --primary:            38 95% 58%;
+    --primary-foreground: 20 6% 8%;
+
+    /* ── Secondary / muted */
+    --muted:              20 8% 15%;
+    --secondary:          20 8% 15%;
+    --secondary-foreground: 30 10% 80%;
+
+    /* ── Accent */
+    --accent:             20 8% 15%;
+    --accent-foreground:  30 10% 80%;
+
+    /* ── Semantic status (adjusted for dark) */
+    --success:            142 64% 44%;
+    --success-dim:        142 64% 8%;
+    --success-border:     142 64% 18%;
+    --warning:            38 88% 52%;
+    --warning-dim:        38 88% 8%;
+    --warning-border:     38 88% 18%;
+    --danger:             0 80% 62%;
+    --danger-dim:         0 80% 8%;
+    --danger-border:      0 80% 20%;
+    --info:               200 80% 55%;
+    --info-dim:           200 80% 8%;
+    --info-border:        200 80% 18%;
+
+    /* ── Destructive */
+    --destructive:            0 80% 62%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* ── Ring */
+    --ring: 38 95% 58%;
+
+    /* ── Shadows (less visible in dark mode) */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.25);
+    --shadow:    0 1px 3px 0 rgb(0 0 0 / 0.35), 0 1px 2px -1px rgb(0 0 0 / 0.25);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.35), 0 2px 4px -2px rgb(0 0 0 / 0.25);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.35), 0 4px 6px -4px rgb(0 0 0 / 0.25);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   BASE STYLES
+   ───────────────────────────────────────────── */
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  code, pre, kbd, samp {
+    font-family: var(--font-mono);
+  }
+
+  /* Smooth scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border-strong));
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
+
+/* ─────────────────────────────────────────────
+   TYPOGRAPHY SCALE
+   ───────────────────────────────────────────── */
+
+/* Label style — used for section headings */
+.text-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Code block — theme-aware */
+.code-block {
+  background-color: hsl(var(--surface));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.dark .code-block {
+  background-color: hsl(222 20% 6%);
+  border-color: hsl(var(--border));
+  color: hsl(210 20% 88%);
+}
+
+/* Status colors — semantic utilities */
+.status-success { color: hsl(var(--success)); }
+.status-warning { color: hsl(var(--warning)); }
+.status-danger  { color: hsl(var(--danger)); }
+.status-info    { color: hsl(var(--info)); }
+
+.bg-success-dim { background-color: hsl(var(--success-dim)); border-color: hsl(var(--success-border)); }
+.bg-warning-dim { background-color: hsl(var(--warning-dim)); border-color: hsl(var(--warning-border)); }
+.bg-danger-dim  { background-color: hsl(var(--danger-dim));  border-color: hsl(var(--danger-border)); }
+.bg-info-dim    { background-color: hsl(var(--info-dim));    border-color: hsl(var(--info-border)); }
+
+/* ─────────────────────────────────────────────
+   MOBILE NAV DRAWER ANIMATION
+   ───────────────────────────────────────────── */
+
+.mobile-drawer {
+  transform: translateX(-100%);
+  transition: transform 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-drawer.open {
+  transform: translateX(0);
+}
+
+.mobile-overlay {
+  opacity: 0;
+  transition: opacity 240ms ease;
+  pointer-events: none;
+}
+
+.mobile-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}

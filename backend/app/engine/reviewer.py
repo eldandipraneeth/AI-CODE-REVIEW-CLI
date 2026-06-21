@@ -20,9 +20,9 @@ from typing import Optional
 
 from openai import APIError, OpenAI, RateLimitError
 
-from ai_codereview.chunker import DiffChunk
-from ai_codereview.prompts import SYSTEM_PROMPT, build_chunk_prompt
-from ai_codereview.schemas import (
+from app.engine.chunker import DiffChunk
+from app.engine.prompts import SYSTEM_PROMPT, build_chunk_prompt
+from app.engine.schemas import (
     Category,
     CodeReviewResult,
     FileReviewResult,
@@ -72,8 +72,16 @@ class AIReviewer:
         # Resolve base_url from parameter or env
         resolved_base_url = base_url or os.environ.get("AI_BASE_URL")
 
+        # Auto-detect base_url if not provided based on model
+        if not resolved_base_url:
+            if "gemini" in self.model.lower():
+                resolved_base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+            elif "llama" in self.model.lower() or "mixtral" in self.model.lower() or "gemma" in self.model.lower():
+                resolved_base_url = "https://api.groq.com/openai/v1"
+
         # Resolve api_key from parameter or env
         resolved_api_key = api_key or os.environ.get("AI_API_KEY")
+        
         client_kwargs = {}
         if resolved_api_key:
             client_kwargs["api_key"] = resolved_api_key
@@ -108,6 +116,92 @@ class AIReviewer:
 
         last_error: Exception | None = None
 
+        # --- MOCK MODE (FALLBACK LINTER) ---
+        # If the API key is 'test_key', run basic static analysis instead of random issues
+        if self._client.api_key == "test_key" or self._client.api_key == "dummy":
+            import time
+            time.sleep(1) # Simulate network delay
+            
+            mock_issues = []
+            score = 10.0
+            
+            # Simple python static analysis
+            if chunk.language and chunk.language.lower() == "python":
+                import ast
+                try:
+                    tree = ast.parse(chunk.content)
+                    
+                    # Check for print statements (Performance / Best Practice)
+                    for node in ast.walk(tree):
+                        if isinstance(node, ast.Call) and getattr(node.func, 'id', '') == 'print':
+                            mock_issues.append(
+                                ReviewIssue(
+                                    file=chunk.file_path,
+                                    line_number=chunk.start_line + getattr(node, 'lineno', 1) - 1,
+                                    severity=Severity.LOW,
+                                    category=Category.MAINTAINABILITY,
+                                    explanation="Found print() statement. In production code, it is recommended to use the standard logging module instead of print.",
+                                    suggested_fix="Replace print() with logger.info() or logger.debug().",
+                                )
+                            )
+                            score = min(score, 8.5)
+                            
+                        # Check for bare except (Security / Bug)
+                        if isinstance(node, ast.ExceptHandler) and node.type is None:
+                            mock_issues.append(
+                                ReviewIssue(
+                                    file=chunk.file_path,
+                                    line_number=chunk.start_line + getattr(node, 'lineno', 1) - 1,
+                                    severity=Severity.HIGH,
+                                    category=Category.ERROR_HANDLING,
+                                    explanation="Bare except clause detected. This will catch all exceptions including KeyboardInterrupt and SystemExit, which can hide bugs.",
+                                    suggested_fix="Specify the exact exception to catch, e.g., 'except Exception as e:'.",
+                                )
+                            )
+                            score = min(score, 6.0)
+
+                except SyntaxError as e:
+                    # Catch actual syntax errors
+                    mock_issues.append(
+                        ReviewIssue(
+                            file=chunk.file_path,
+                            line_number=chunk.start_line + getattr(e, 'lineno', 1) - 1,
+                            severity=Severity.HIGH,
+                            category=Category.BUG,
+                            explanation=f"Syntax Error: {e.msg}. This code will throw an error and fail to execute.",
+                            suggested_fix="Fix the syntax error according to Python grammar rules.",
+                        )
+                    )
+                    score = min(score, 2.0)
+            
+            # General checks for any language
+            if not mock_issues and "TODO" in chunk.content.upper():
+                 mock_issues.append(
+                     ReviewIssue(
+                         file=chunk.file_path,
+                         line_number=chunk.start_line,
+                         severity=Severity.LOW,
+                         category=Category.MAINTAINABILITY,
+                         explanation="Found unresolved TODO comment in the code.",
+                         suggested_fix="Resolve the TODO or track it in an issue tracker.",
+                     )
+                 )
+                 score = min(score, 9.0)
+
+            if not mock_issues:
+                summary = "The code looks clean and well-structured."
+            elif score <= 4.0:
+                summary = "The code contains critical errors that must be fixed."
+            else:
+                summary = f"Found {len(mock_issues)} areas for improvement."
+                
+            return FileReviewResult(
+                issues=mock_issues,
+                chunk_summary=summary,
+                chunk_quality_score=score,
+            )
+        # -----------------------------------
+
         for attempt in range(self.max_retries):
             try:
                 if self._use_beta_parse:
@@ -130,12 +224,12 @@ class AIReviewer:
                 )
                 time.sleep(delay)
 
-            except APIError as e:
+            except Exception as e:
                 last_error = e
                 if attempt < self.max_retries - 1:
                     delay = _BASE_DELAY * (_BACKOFF_FACTOR ** attempt)
                     logger.warning(
-                        "API error (attempt %d/%d): %s, retrying in %.1fs...",
+                        "API or Validation error (attempt %d/%d): %s, retrying in %.1fs...",
                         attempt + 1,
                         self.max_retries,
                         e,
@@ -259,6 +353,9 @@ class AIReviewer:
 
         # Deduplicate issues
         unique_issues = _deduplicate_issues(all_issues)
+
+        if not scores and chunks:
+            raise ReviewError("All chunks failed to review. Please check your AI API key and model settings.")
 
         # Sort by severity (HIGH first, then MEDIUM, then LOW)
         severity_order = {Severity.HIGH: 0, Severity.MEDIUM: 1, Severity.LOW: 2}

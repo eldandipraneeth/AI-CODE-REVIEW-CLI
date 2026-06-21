@@ -57,7 +57,7 @@ def _review_fixture(fixture_name: str) -> CodeReviewResult:
     chunks = chunk_diff(diff_text, max_tokens=4000)
 
     reviewer = AIReviewer(
-        model=os.environ.get("CODEREVIEW_MODEL", "gpt-4o-mini"),
+        model=os.environ.get("CODEREVIEW_MODEL", "gemini-2.5-flash"),
         api_key=os.environ["AI_API_KEY"],
     )
     return reviewer.review_chunks(chunks)

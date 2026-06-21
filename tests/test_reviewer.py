@@ -74,7 +74,7 @@ def _make_reviewer_with_mock(mock_client):
     """Create an AIReviewer with a mocked OpenAI client."""
     reviewer = AIReviewer.__new__(AIReviewer)
     reviewer._client = mock_client
-    reviewer.model = "gpt-4o"
+    reviewer.model = "gemini-2.5-flash"
     reviewer.temperature = 0.1
     reviewer.max_retries = 1
     reviewer._use_beta_parse = True
@@ -188,14 +188,14 @@ class TestAIReviewer:
         client.beta.chat.completions.parse.return_value = _make_mock_response(result_a)
 
         reviewer = _make_reviewer_with_mock(client)
-        reviewer.model = "gpt-4o-mini"
+        reviewer.model = "gemini-2.5-flash"
 
         chunks = [_make_chunk()]
         reviewer.review_chunks(chunks)
 
         call_kwargs = client.beta.chat.completions.parse.call_args
         assert call_kwargs is not None
-        assert call_kwargs.kwargs.get("model") == "gpt-4o-mini"
+        assert call_kwargs.kwargs.get("model") == "gemini-2.5-flash"
 
     def test_result_quality_score_in_range(self):
         """The returned quality_score must be between 0 and 10."""

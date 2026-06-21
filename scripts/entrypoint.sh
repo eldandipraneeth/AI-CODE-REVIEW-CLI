@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # ── Resolve inputs ──────────────────────────────────────────
-MODEL="${INPUT_MODEL:-gpt-4o}"
+MODEL="${INPUT_MODEL:-gemini-2.5-flash}"
 SEVERITY="${INPUT_SEVERITY_THRESHOLD:-low}"
 POST_COMMENTS="${INPUT_POST_COMMENTS:-true}"
 

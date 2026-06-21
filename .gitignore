@@ -1,5 +1,12 @@
 # Environment secrets
 .env
+backend/.env
+frontend/.env.local
+frontend/.env
+
+# Databases
+*.db
+*.sqlite3
 
 # Python
 __pycache__/
@@ -30,3 +37,16 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+node_modules/
+
+frontend/node_modules/
+
+frontend/dist/
+
+package-lock.json
+
+
+node_modules/
+frontend/node_modules/
+frontend/dist/
+package-lock.json

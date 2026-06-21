@@ -241,7 +241,7 @@ def diff(
     Examples:
         codereview diff
         codereview diff --unstaged
-        codereview diff --model gpt-4o-mini --json
+        codereview diff --model gemini-2.5-flash --json
     """
     api_key = os.environ.get("AI_API_KEY")
     if not api_key:
